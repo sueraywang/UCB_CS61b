@@ -5,15 +5,8 @@ import java.sql.Array;
 import java.util.Comparator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
-    private Comparator<T> comparator = new Comparator<T>() {
-        @Override
-        public int compare(T o1, T o2) {
-            if ((int) o1 > (int) o2) {
-                return 1;
-            } else if ((int) o1 == (int) o2) {
-                return 0;
-            } else return -1;
-        }
+    private Comparator<T> comparator = (o1, o2) -> {
+        return ((int) o1 - (int) o2);
     };
 
     public MaxArrayDeque() {
@@ -36,7 +29,8 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
             return null;
         }
         T maxItem = (T) arr[0];
-        for (int i = 1; i < size; i++) {
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] == null) break;
             if (comparator.compare((T) arr[i],maxItem) > 0) {
                 maxItem = (T) arr[i];
             }
@@ -49,7 +43,8 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
             return null;
         }
         T maxItem = (T) arr[0];
-        for (int i = 1; i < size; i++) {
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] == null) break;
             if (c.compare((T) arr[i],maxItem) > 0) {
                 maxItem = (T) arr[i];
             }

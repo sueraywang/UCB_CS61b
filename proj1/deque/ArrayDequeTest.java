@@ -156,4 +156,45 @@ public class ArrayDequeTest {
 
     }
 
+    @Test
+    /* Add large number of elements to deque; check if order is correct. */
+    public void equalTest() {
+
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> lld2 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 100000; i++) {
+            lld1.addLast(i);
+            lld2.addLast(i);
+        }
+
+        boolean result = lld1.equals(lld2);
+
+        assertEquals("Should be true", true, result);
+
+
+    }
+
+    @Test
+    public void testIterator() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 10; i++) {
+            lld1.addLast(i);
+        }
+
+        for (int i : lld1) {
+            System.out.println(i);
+        }
+    }
+
+    @Test
+    public void testGet() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 10; i++) {
+            lld1.addFirst(i);
+        }
+
+        assertEquals("Should be true", 6, lld1.get(3),0.0);
+        assertEquals("Should be true", 4, lld1.get(5),0.0);
+    }
+
 }

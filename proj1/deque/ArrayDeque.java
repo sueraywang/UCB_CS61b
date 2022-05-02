@@ -7,8 +7,8 @@ import java.util.Iterator;
 public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     protected Object[] arr;
     protected int size = 0;
-    protected int firstIndex;
-    protected int lastIndex;
+    protected int firstIndex = 0;
+    protected int lastIndex = 0;
 
     public ArrayDeque() {
         arr = new Object[8];
@@ -18,6 +18,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         arr = new Object[8];
         arr[0] = item;
         size++;
+        lastIndex = 1;
     }
 
     @Override
@@ -25,7 +26,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         if (size > 0.75 * arr.length) {
             expandSize();
         }
-        firstIndex = Math.floorMod(firstIndex - 1, arr.length);
+        if (size != 0) {
+            firstIndex = Math.floorMod(firstIndex - 1, arr.length);
+        }
         arr[firstIndex] = item;
         size++;
     }
@@ -35,7 +38,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         if (size > 0.75 * arr.length) {
             expandSize();
         }
-        lastIndex = Math.floorMod(firstIndex + 1, arr.length);
+        if (size != 0) {
+            lastIndex = Math.floorMod(lastIndex + 1, arr.length);
+        }
         arr[lastIndex] = item;
         size++;
     }
