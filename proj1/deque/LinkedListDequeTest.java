@@ -164,9 +164,15 @@ public class LinkedListDequeTest {
     public void testGet() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
         lld1.addFirst(0);
-        lld1.addLast(1);
-        System.out.println(lld1.removeLast());
-        System.out.println(lld1.removeLast());
+        lld1.removeLast();
+        lld1.addFirst(2);
+        lld1.addFirst(3);
+        lld1.addFirst(4);
+        lld1.isEmpty();
+        lld1.removeLast();
+        lld1.addFirst(7);
+        lld1.removeLast();
+        lld1.removeLast();
         /*
 
         for (int i = 0; i < 10; i++) {
