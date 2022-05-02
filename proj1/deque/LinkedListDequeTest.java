@@ -163,6 +163,12 @@ public class LinkedListDequeTest {
     @Test
     public void testGet() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        lld1.addFirst(0);
+        lld1.addLast(1);
+        System.out.println(lld1.removeLast());
+        System.out.println(lld1.removeLast());
+        /*
+
         for (int i = 0; i < 10; i++) {
             lld1.addLast(i);
         }
@@ -172,5 +178,7 @@ public class LinkedListDequeTest {
         assertEquals("Should be true", 5, lld1.getRecursive(5),0.0);
         assertEquals("Should be true", 1, lld1.getRecursive(1),0.0);
 
+
+         */
     }
 }

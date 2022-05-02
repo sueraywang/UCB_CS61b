@@ -1,10 +1,8 @@
 package deque;
 
-import java.net.Socket;
-import java.sql.Array;
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     protected Object[] arr;
     protected int size = 0;
     protected int firstIndex = 0;
@@ -16,13 +14,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
 
     public ArrayDeque(int size) {
         arr = new Object[size];
-    }
-
-    public ArrayDeque(T item) {
-        arr = new Object[8];
-        arr[0] = item;
-        size++;
-        lastIndex = 1;
     }
 
     @Override

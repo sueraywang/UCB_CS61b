@@ -1,18 +1,17 @@
 package deque;
 
-import java.net.Socket;
 import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private Node<T> sentinel = null;
     private int size;
 
-    class Node<T> {
+    private class Node<T> {
         private T item;
         private Node<T> next;
         private Node<T> prev;
 
-        public Node(T item) {
+        Node(T item) {
             this.item = item;
         }
 
@@ -27,11 +26,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         size = 0;
     }
 
-    public LinkedListDeque(T item) {
-        createSingleItem(item);
-        size = 1;
-    }
-
     public LinkedListDeque(Node<T> node) {
         sentinel = node;
         size = 1;
@@ -39,6 +33,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     /**
      * Make sentinel point to a single item, with prev and next all point to itself.
+     *
      * @param item the content of the single item
      */
     public void createSingleItem(T item) {
@@ -52,8 +47,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (size == 0) {
             createSingleItem(item);
         } else {
-            Node<T> first = new Node<>(item,sentinel.prev,sentinel);
+            Node<T> first = new Node<>(item, sentinel.prev, sentinel);
             sentinel.prev.next = first;
+            if (size == 1) {
+                sentinel.prev = first;
+            }
             sentinel = first;
         }
         size++;
@@ -64,7 +62,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (size == 0) {
             createSingleItem(item);
         } else {
-            Node<T> last = new Node<>(item,sentinel.prev,sentinel);
+            Node<T> last = new Node<>(item, sentinel.prev, sentinel);
             sentinel.prev.next = last;
             sentinel.prev = last;
         }
@@ -147,7 +145,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 
-    private class LinkedListDequeIterator implements Iterator{
+    private class LinkedListDequeIterator implements Iterator {
         private int position;
 
         public LinkedListDequeIterator() {
@@ -173,7 +171,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (o == null) return false;
         if (o == this) return true;
         if (!(o instanceof LinkedListDeque)) return false;
-        LinkedListDeque<T> lld= (LinkedListDeque<T>) o;
+        LinkedListDeque<T> lld = (LinkedListDeque<T>) o;
         Node<T> thisp = sentinel;
         Node<T> lldp = lld.sentinel;
         while (thisp.next != sentinel) {
