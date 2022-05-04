@@ -139,7 +139,9 @@ public class ArrayDequeTest {
     @Test
     public void maxArrayDequeTest() {
 
-        MaxArrayDeque<Integer> lld1 = new MaxArrayDeque<Integer>();
+        MaxArrayDeque<Integer> lld1 = new MaxArrayDeque<Integer>((o1, o2) -> {
+            return ((int) o1 - (int) o2);
+        });
         lld1.addLast(10);
         lld1.addLast(1);
         lld1.addLast(-7);
@@ -189,12 +191,22 @@ public class ArrayDequeTest {
     @Test
     public void testGet() {
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+
+        lld1.addFirst(0);
+        lld1.removeLast();
+        lld1.isEmpty();
+        lld1.addFirst(3);
+        lld1.removeLast();
+
+        /*
         for (int i = 0; i < 10; i++) {
             lld1.addFirst(i);
         }
 
         assertEquals("Should be true", 6, lld1.get(3),0.0);
         assertEquals("Should be true", 4, lld1.get(5),0.0);
+
+         */
     }
 
 }

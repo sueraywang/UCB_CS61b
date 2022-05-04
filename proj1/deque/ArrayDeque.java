@@ -3,10 +3,10 @@ package deque;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
-    protected Object[] arr;
-    protected int size = 0;
-    protected int firstIndex = 0;
-    protected int lastIndex = 0;
+    private Object[] arr;
+    private int size = 0;
+    private int firstIndex = 0;
+    private int lastIndex = 0;
 
     public ArrayDeque() {
         arr = new Object[8];
@@ -14,6 +14,22 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     public ArrayDeque(int size) {
         arr = new Object[size];
+    }
+
+    public Object[] getArr() {
+        return arr;
+    }
+
+    public void setArr(Object[] arr) {
+        this.arr = arr;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     @Override
@@ -61,7 +77,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             shrinkSize();
         }
         T removed = (T) arr[firstIndex];
-        firstIndex = Math.floorMod(firstIndex + 1, arr.length);
+        if (size == 1) {
+            firstIndex = lastIndex;
+        } else {
+            firstIndex = Math.floorMod(firstIndex + 1, arr.length);
+        }
         size--;
         return removed;
     }
@@ -75,7 +95,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             shrinkSize();
         }
         T removed = (T) arr[lastIndex];
-        lastIndex = Math.floorMod(lastIndex - 1, arr.length);
+        if (size == 1) {
+            lastIndex = firstIndex;
+        } else {
+            lastIndex = Math.floorMod(lastIndex - 1, arr.length);
+        }
         size--;
         return removed;
     }
@@ -85,17 +109,17 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return (T) arr[Math.floorMod(index + firstIndex,arr.length)];
     }
 
-    public void expandSize() {
+    private void expandSize() {
         Object[] copy = new Object[(int) (arr.length * 1.5)];
         copyArray(copy);
     }
 
-    public void shrinkSize() {
+    private void shrinkSize() {
         Object[] copy = new Object[(int) (size / 0.5)];
         copyArray(copy);
     }
 
-    public void copyArray(Object[] copy) {
+    private void copyArray(Object[] copy) {
         for (int i = firstIndex; i < size + firstIndex; i++) {
             copy[i - firstIndex] = arr[Math.floorMod(i, arr.length)];
         }
@@ -107,10 +131,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public boolean equals(Object o) {
         if (o == null) return false;
         if (o == this) return true;
-        if (!(o instanceof ArrayDeque)) return false;
-        ArrayDeque<T> arrayDeque = (ArrayDeque<T>) o;
+        if (!(o instanceof Deque)) return false;
+        Deque<T> lld = (Deque<T>) o;
+        if (lld.size() != size) return false;
         for (int i = 0; i < size; i++) {
-            if (!(this.get(i).equals(arrayDeque.get(i)))) {
+            if (!(get(i).equals(lld.get(i)))) {
                 return false;
             }
         }

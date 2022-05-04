@@ -36,7 +36,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
      *
      * @param item the content of the single item
      */
-    public void createSingleItem(T item) {
+    private void createSingleItem(T item) {
         sentinel = new Node<>(item);
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
@@ -168,15 +168,13 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     public boolean equals(Object o) {
         if (o == null) return false;
         if (o == this) return true;
-        if (!(o instanceof LinkedListDeque)) return false;
-        LinkedListDeque<T> lld = (LinkedListDeque<T>) o;
-        Node<T> thisp = sentinel;
-        Node<T> lldp = lld.sentinel;
-        while (thisp.next != sentinel) {
-            if (thisp.item.equals(lldp.item)) {
-                thisp = thisp.next;
-                lldp = lldp.next;
-            } else return false;
+        if (!(o instanceof Deque)) return false;
+        Deque<T> lld = (Deque<T>) o;
+        if (lld.size() != size) return false;
+        for (int i = 0; i < size; i++) {
+            if (!(get(i).equals(lld.get(i)))) {
+                return false;
+            }
         }
         return true;
     }
