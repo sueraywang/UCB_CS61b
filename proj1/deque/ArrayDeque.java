@@ -160,7 +160,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public T next() {
-            T returnVal = (T) arr[Math.floorMod(firstIndex + 1, arr.length)];
+            T returnVal = (T) arr[Math.floorMod(count, arr.length)];
             count++;
             return returnVal;
         }
