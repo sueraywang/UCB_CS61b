@@ -2,6 +2,8 @@ package gh2;
 import edu.princeton.cs.algs4.StdAudio;
 import edu.princeton.cs.algs4.StdDraw;
 
+import java.util.LinkedList;
+
 /**
  * A client that uses the synthesizer package to replicate a plucked guitar string sound
  */

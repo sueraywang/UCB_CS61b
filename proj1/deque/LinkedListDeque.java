@@ -1,6 +1,7 @@
 package deque;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private Node<T> sentinel = null;
