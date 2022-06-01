@@ -75,8 +75,6 @@ class Repository {
         HEAD = Utils.readObject(head, HEAD.getClass());
         Blob fileInCommit = HEAD.searchFor(fileName);
         if (fileInCommit != null && fileInCommit.equals(target)) {
-            System.out.println(
-                    String.format("Identical file found in commit, %s isn't not added.", fileName));
             //if the file in commit is identical to input
             //remove it from staging area (if there is one) and return.
             if (stagedForAddition.get(fileName) != null) {
@@ -160,13 +158,18 @@ class Repository {
         HEAD = Utils.readObject(head, HEAD.getClass());
         Commit pointer = HEAD;
         while (pointer != pointer.getParent()) {
-            System.out.println("===");
-            System.out.println("commit " + pointer.getUID());
-            System.out.println("Date: " + pointer.getTimestamp());
-            System.out.println(pointer.getLog());
-            System.out.print("\n");
+            printLogInfo(pointer);
             pointer = pointer.getParent();
         }
+        printLogInfo(pointer);
+    }
+
+    private void printLogInfo(Commit pointer) {
+        System.out.println("===");
+        System.out.println("commit " + pointer.getUID());
+        System.out.println("Date: " + pointer.getTimestamp());
+        System.out.println(pointer.getLog());
+        System.out.print("\n");
     }
 
 
