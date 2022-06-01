@@ -1,5 +1,8 @@
 package gitlet;
 
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /** Represents a gitlet commit object.
@@ -8,7 +11,7 @@ import java.util.TreeMap;
  *
  *  @author Sueray
  */
-class Commit {
+class Commit implements Serializable, Cloneable {
 
     /** The UID that identifies different commits. */
     private String UID;
@@ -18,8 +21,8 @@ class Commit {
     private String log;
     /** The parent commit of current commit. */
     private Commit parent;
-    /** The tree that maps objects' names to object references. */
-    private TreeMap<String, Object> treeOfObjects = null;
+    /** The tree that maps objects' names to blobs (identified by id/sha1). */
+    private TreeMap<String, Blob> treeOfBlobs = new TreeMap<>();
 
     /** The constructor with no argument creates an initial commit. */
     public Commit() {
@@ -29,35 +32,34 @@ class Commit {
         parent = this;
     }
 
-    public Commit(String log, String timestamp, Commit parent, TreeMap<String, Object> parentObjects) {
+    public Commit(String log, String timestamp, Commit parent) {
         this.timestamp = timestamp;
         this.log = log;
         this.parent = parent;
-        this.treeOfObjects = parentObjects;
-        UID = Utils.sha1(log, timestamp, treeOfObjects, parent);
+        UID = Utils.sha1(log, timestamp, Utils.serialize(treeOfBlobs), Utils.serialize(parent));
     }
 
     /** Add an object to the object tree.
      * @param name the key of object
-     * @param obj the actual content mapped by name
+     * @param b the actual content mapped by name
      */
-    public void addObject(String name, Object obj) {
-        treeOfObjects.put(name, obj);
+    public void addBlob(String name, Blob b) {
+        treeOfBlobs.put(name, b);
     }
 
     /** Add an object to the object tree.
      * @param name the key of object
      */
-    public void removeObject(String name) {
-        treeOfObjects.remove(name);
+    public void removeBlob(String name) {
+        treeOfBlobs.remove(name);
     }
 
     /** Search for the target in the object tree.
-     * @param target the name of target object
+     * @param name the name of target object
      * @return the target object or null if target doesn't exist
      */
-    public Object searchForObject(String target) {
-        return treeOfObjects.get(target);
+    public Blob searchFor(String name) {
+        return treeOfBlobs.get(name);
     }
 
     //getter and setters
@@ -77,7 +79,13 @@ class Commit {
         return parent;
     }
 
-    public TreeMap<String, Object> getTreeOfObjects() {
-        return treeOfObjects;
+    public TreeMap<String, Blob> getTreeOfBlobs() {
+        return treeOfBlobs;
+    }
+
+    public void setTreeOfBlobs(TreeMap<String, Blob> treeOfBlobs) {
+        for (Map.Entry<String, Blob> entries : treeOfBlobs.entrySet()) {
+            this.treeOfBlobs.put(entries.getKey(), entries.getValue());
+        }
     }
 }

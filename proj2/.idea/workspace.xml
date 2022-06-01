@@ -5,12 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa1d94be-80ef-4a0b-8885-84474937a729" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../lab6/testing/runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/../lab6/testing/runner.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/good.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gitlet/Commit.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Commit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gitlet/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gitlet/Repository.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Repository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gitlet/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/gitlet/Commit.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/gitlet/Commit.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/gitlet/Repository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/gitlet/Repository.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +41,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -48,6 +50,7 @@
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="gitlet.Main" />
       <module name="proj2" />
+      <option name="PROGRAM_PARAMETERS" value="add good.txt" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="gitlet.*" />
@@ -82,6 +85,10 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.Main" />
+      <item itemvalue="Application.littleTests" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
@@ -99,5 +106,11 @@
       <updated>1652755298250</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
 </project>
