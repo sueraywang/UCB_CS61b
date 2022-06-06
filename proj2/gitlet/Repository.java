@@ -15,21 +15,25 @@ class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = Utils.join(CWD, ".gitlet");
-    /** The .snapShot directory. */
-    public static final File SNAPSHOT_DIR = Utils.join(CWD, ".snapShot");
+    /** The file of commits */
+    public static final File COMMITS_DIR = Utils.join(GITLET_DIR, "commits");
     /** The file with staged Blobs to be added. */
     public static final File fileOfAddStage = Utils.join(GITLET_DIR, "addition");
     /** The file with staged Blobs to be removed. */
     public static final File fileOfRemoveStage = Utils.join(GITLET_DIR, "removal");
+    /** The file commit tree. */
+    public static final File fileOfCommits = Utils.join(GITLET_DIR, "commit tree");
     /** The file of HEAD */
     public static final File head = Utils.join(GITLET_DIR, "head");
-    /** The file of HEAD */
-    public static final File fileOfCommitTree = Utils.join(GITLET_DIR, "commit tree");
+    /** The file of branches */
+    public static final File branches = Utils.join(GITLET_DIR, "branches");
     /** The initialCommit for all directories. */
     public static final Commit INITIAL_COMMIT = new Commit();
 
     /** The HEAD pointer of this Repository. */
     private Commit HEAD = INITIAL_COMMIT;
+    /** The branches of this Repository. */
+    private ArrayList<String> BRANCHES = new ArrayList<>();
     /** The map of commits, keys are sha-1, vals are commits */
     private TreeMap<String, Commit> treeOfCommits = new TreeMap<>();
     /** The map of Blobs to be staged */
@@ -48,13 +52,14 @@ class Repository {
         }
         //make the .gitlet and .stage dir.
         GITLET_DIR.mkdir();
-        //put initial commit into the directory's commit tree.
-        treeOfCommits.put(INITIAL_COMMIT.getUID(), INITIAL_COMMIT);
-        //create the master branch here and put the initialCommit in it.
-        Branch master = new Branch("master", INITIAL_COMMIT);
+        COMMITS_DIR.mkdir();
+        //treeOfCommits.put(INITIAL_COMMIT.getUID(), INITIAL_COMMIT);
         //set HEAD pointer to the INITIAL_COMMIT.
         HEAD = INITIAL_COMMIT;
         Utils.writeObject(head, HEAD);
+        Utils.writeObject(branches, BRANCHES);
+        //Utils.writeObject(fileOfCommits, treeOfCommits);
+        Utils.writeObject(Utils.join(COMMITS_DIR, HEAD.getUID()), HEAD);
     }
 
     /** Add a file to the staging area of current commit.
@@ -87,22 +92,60 @@ class Repository {
         }
     }
 
+    public void removeAFile(String fileName) {
+        //construct the copy of target file in local repo
+        File file = Utils.join(CWD, fileName);
+        Blob target = Blob.snapShot(file);
+        //check the existence of target file in commit
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        Blob fileInCommit = HEAD.searchFor(fileName);
+        //remove file from commit
+        if (fileInCommit != null) {
+            if (fileOfRemoveStage.exists()) {
+                stagedForRemoval = Utils.readObject(fileOfRemoveStage, stagedForAddition.getClass());
+            }
+            stagedForRemoval.put(fileName, target);
+            Utils.writeObject(fileOfRemoveStage, stagedForRemoval);
+            Utils.restrictedDelete(file);
+        } else if (fileOfAddStage.exists()) {
+            stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
+            if (stagedForAddition.get(fileName) != null) {
+                stagedForAddition.remove(fileName);
+                Utils.writeObject(fileOfRemoveStage, stagedForRemoval);
+            }
+        } else {
+            Utils.exitWithError("No reason to remove the file.");
+        }
+    }
+
     /** Saves current commit and create a new commit.
      * @param message the log message of this commit
      * */
     public void commit(String message) {
-        if (!(fileOfAddStage.exists())) {
+        if (!(fileOfAddStage.exists() || fileOfRemoveStage.exists())) {
             Utils.exitWithError("No changes added to the commit.");
         }
         if (message.equals("")) {
             Utils.exitWithError("Please enter a commit message.");
         }
         //pull out all changes to be committed and the current commit tree
-        stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
-        //stagedForRemoval = Utils.readObject(fileOfRemoveStage, stagedForRemoval.getClass());
+        if (fileOfAddStage.exists()) {
+            stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
+        }
+        if (fileOfRemoveStage.exists()) {
+            stagedForRemoval = Utils.readObject(fileOfRemoveStage, stagedForRemoval.getClass());
+        }
         HEAD = Utils.readObject(head, HEAD.getClass());
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        String branch = "master";
+        for (String s : BRANCHES) {
+            if (s.charAt(0) == '*') {
+                branch = s.substring(1);
+                break;
+            }
+        }
         //create a "current commit" whose parent points to previous "current commit".
-        Commit current = new Commit(message, new Date().toString(), HEAD);
+        Commit current = new Commit(message, new Date().toString(), HEAD, branch);
         current.setTreeOfBlobs(HEAD.getTreeOfBlobs());
         HEAD = current;
         //add everything staged for addition to current commit
@@ -113,11 +156,13 @@ class Repository {
         for (String keys : stagedForRemoval.keySet()) {
             HEAD.removeBlob(keys);
         }
-        //treeOfCommits.put(HEAD.getUID(), HEAD);
-        Utils.writeObject(head, HEAD);
-        //Utils.writeObject(fileOfCommitTree, treeOfCommits);
-        clearStagingArea();
 
+        //treeOfCommits.put(current.getUID(), current);
+        Utils.writeObject(head, HEAD);
+        Utils.writeObject(branches, BRANCHES);
+        //Utils.writeObject(fileOfCommits, treeOfCommits);
+        Utils.writeObject(Utils.join(COMMITS_DIR, HEAD.getUID()), HEAD);
+        clearStagingArea();
     }
 
     /** Takes file with fileName in the head commit
@@ -164,18 +209,71 @@ class Repository {
         printLogInfo(pointer);
     }
 
-    private void printLogInfo(Commit pointer) {
-        System.out.println("===");
-        System.out.println("commit " + pointer.getUID());
-        System.out.println("Date: " + pointer.getTimestamp());
-        System.out.println(pointer.getLog());
-        System.out.print("\n");
+    /** Display information about each commit.
+     * Order doesn't matter. */
+    public void global_log() {
+        List<String> commits = Utils.plainFilenamesIn(COMMITS_DIR);
+        for (String s : commits) {
+            System.out.println(s);
+        }
+    }
+
+    /** Prints out the ids of all commits that have the given commit message, one per line. */
+    public void find(String arg) {
+        int count = 0;
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        Commit pointer = HEAD;
+        while (pointer != pointer.getParent()) {
+            if (pointer.getLog().contains(arg)) {
+                System.out.println(pointer.getUID());
+                count++;
+            }
+            pointer = pointer.getParent();
+        }
+        if (count == 0) {
+            Utils.exitWithError("Found no commit with that message.");
+        }
+    }
+
+    //not finished
+    public void status() {
+    }
+
+    //not finished
+    /** Creates a new branch with the given name, and points it at the current head commit.
+     * @param arg The branch name
+     * */
+    public void branch(String arg) {
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        if (BRANCHES.contains(arg)) {
+            Utils.exitWithError("A branch with that name already exists.");
+        }
+        BRANCHES.add(arg);
+        Utils.writeObject(branches, BRANCHES);
     }
 
 
     //not finished
-    /** Not finished yet. */
     public void checkoutABranch(String arg) {
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        String currentBranch = "master";
+        for (String s : BRANCHES) {
+            if (s.charAt(0) == '*') {
+                currentBranch = s.substring(1);
+                break;
+            }
+        }
+        if (currentBranch == arg) {
+            Utils.exitWithError("No need to checkout the current branch.");
+        } else if (!BRANCHES.contains(arg)) {
+            Utils.exitWithError("No such branch exists.");
+        }
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        Commit pointer = HEAD;
+        while (pointer != pointer.getParent()) {
+            printLogInfo(pointer);
+            pointer = pointer.getParent();
+        }
     }
 
 
@@ -206,5 +304,14 @@ class Repository {
         }
         File dest = Utils.join(CWD, fileName);
         Utils.writeContents(dest, target.getRef());
+    }
+
+    /** Display log info of certain commit. */
+    private void printLogInfo(Commit pointer) {
+        System.out.println("===");
+        System.out.println("commit " + pointer.getUID());
+        System.out.println("Date: " + pointer.getTimestamp());
+        System.out.println(pointer.getLog());
+        System.out.print("\n");
     }
 }

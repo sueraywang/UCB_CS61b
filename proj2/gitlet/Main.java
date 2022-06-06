@@ -53,6 +53,31 @@ public class Main {
                 checkInitialization(repository);
                 repository.log();
                 break;
+            case "rm":
+                validateNumArgs("rm", args, 2);
+                checkInitialization(repository);
+                repository.removeAFile(args[1]);
+                break;
+            case "global-log":
+                validateNumArgs("global-log", args, 1);
+                checkInitialization(repository);
+                repository.global_log();
+                break;
+            case "find":
+                validateNumArgs("find", args, 2);
+                checkInitialization(repository);
+                repository.find(args[1]);
+                break;
+            case "status":
+                validateNumArgs("status", args, 1);
+                checkInitialization(repository);
+                repository.status();
+                break;
+            case "branch":
+                validateNumArgs("branch", args, 2);
+                checkInitialization(repository);
+                repository.branch(args[1]);
+                break;
             default:
                 Utils.exitWithError("No command with that name exists.");
         }

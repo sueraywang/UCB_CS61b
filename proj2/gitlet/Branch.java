@@ -2,11 +2,11 @@ package gitlet;
 
 public class Branch {
     private String name;
-    private Commit commitOfBranch = null;
+    private Commit pointer = null;
 
-    public Branch(String name, Commit commitOfBranch) {
+    public Branch(String name, Commit pointer) {
         this.name = name;
-        this.commitOfBranch = commitOfBranch;
+        this.pointer = pointer;
     }
 
     /** Returns the furthest point of a branch */

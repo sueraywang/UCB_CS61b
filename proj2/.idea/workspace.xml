@@ -5,7 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa1d94be-80ef-4a0b-8885-84474937a729" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitlet/commit tree" beforeDir="false" afterPath="$PROJECT_DIR$/.gitlet/commit tree" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitlet/head" beforeDir="false" afterPath="$PROJECT_DIR$/.gitlet/head" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bad.txt" beforeDir="false" afterPath="$PROJECT_DIR$/bad.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gitlet/Branch.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Branch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gitlet/Commit.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Commit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gitlet/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gitlet/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gitlet/Repository.class" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Repository.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gitlet/Repository.java" beforeDir="false" afterPath="$PROJECT_DIR$/gitlet/Repository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,6 +33,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="1" />

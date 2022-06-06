@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /** Represents a gitlet commit object.
@@ -21,6 +20,8 @@ class Commit implements Serializable, Cloneable {
     private String log;
     /** The parent commit of current commit. */
     private Commit parent;
+    /** The branch that current commit belongs to. */
+    private String branch;
     /** The tree that maps objects' names to blobs (identified by id/sha1). */
     private TreeMap<String, Blob> treeOfBlobs = new TreeMap<>();
 
@@ -30,12 +31,14 @@ class Commit implements Serializable, Cloneable {
         log = "initial commit";
         UID = Utils.sha1(log, timestamp);
         parent = this;
+        branch = "master";
     }
 
-    public Commit(String log, String timestamp, Commit parent) {
+    public Commit(String log, String timestamp, Commit parent, String branch) {
         this.timestamp = timestamp;
         this.log = log;
         this.parent = parent;
+        this.branch = branch;
         UID = Utils.sha1(log, timestamp, Utils.serialize(treeOfBlobs), Utils.serialize(parent));
     }
 
@@ -87,5 +90,13 @@ class Commit implements Serializable, Cloneable {
         for (Map.Entry<String, Blob> entries : treeOfBlobs.entrySet()) {
             this.treeOfBlobs.put(entries.getKey(), entries.getValue());
         }
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 }
