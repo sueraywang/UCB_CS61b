@@ -56,6 +56,7 @@ class Repository {
         //treeOfCommits.put(INITIAL_COMMIT.getUID(), INITIAL_COMMIT);
         //set HEAD pointer to the INITIAL_COMMIT.
         HEAD = INITIAL_COMMIT;
+        BRANCHES.add("master");
         Utils.writeObject(head, HEAD);
         Utils.writeObject(branches, BRANCHES);
         //Utils.writeObject(fileOfCommits, treeOfCommits);
@@ -136,16 +137,9 @@ class Repository {
             stagedForRemoval = Utils.readObject(fileOfRemoveStage, stagedForRemoval.getClass());
         }
         HEAD = Utils.readObject(head, HEAD.getClass());
-        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
-        String branch = "master";
-        for (String s : BRANCHES) {
-            if (s.charAt(0) == '*') {
-                branch = s.substring(1);
-                break;
-            }
-        }
+
         //create a "current commit" whose parent points to previous "current commit".
-        Commit current = new Commit(message, new Date().toString(), HEAD, branch);
+        Commit current = new Commit(message, new Date().toString(), HEAD, HEAD.getBranch());
         current.setTreeOfBlobs(HEAD.getTreeOfBlobs());
         HEAD = current;
         //add everything staged for addition to current commit
@@ -159,7 +153,6 @@ class Repository {
 
         //treeOfCommits.put(current.getUID(), current);
         Utils.writeObject(head, HEAD);
-        Utils.writeObject(branches, BRANCHES);
         //Utils.writeObject(fileOfCommits, treeOfCommits);
         Utils.writeObject(Utils.join(COMMITS_DIR, HEAD.getUID()), HEAD);
         clearStagingArea();
@@ -235,11 +228,31 @@ class Repository {
         }
     }
 
-    //not finished
     public void status() {
+        System.out.println("=== Branches ===");
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        String currentBranch = HEAD.getBranch();
+        for (String s : BRANCHES) {
+            if (s.equals(currentBranch)) {s = "*" + s;}
+            System.out.println(s);
+        }
+        if (fileOfAddStage.exists()) {
+            System.out.println("=== Staged Files ===");
+            stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
+            for (String s : stagedForAddition.keySet()) {
+                System.out.println(s);
+            }
+        }
+        if (fileOfRemoveStage.exists()) {
+            System.out.println("=== Removed Files ===");
+            stagedForRemoval = Utils.readObject(fileOfRemoveStage, stagedForRemoval.getClass());
+            for (String s : stagedForRemoval.keySet()) {
+                System.out.println(s);
+            }
+        }
     }
 
-    //not finished
     /** Creates a new branch with the given name, and points it at the current head commit.
      * @param arg The branch name
      * */
@@ -252,28 +265,17 @@ class Repository {
         Utils.writeObject(branches, BRANCHES);
     }
 
-
-    //not finished
     public void checkoutABranch(String arg) {
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
-        String currentBranch = "master";
-        for (String s : BRANCHES) {
-            if (s.charAt(0) == '*') {
-                currentBranch = s.substring(1);
-                break;
-            }
-        }
-        if (currentBranch == arg) {
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        String currentBranch = HEAD.getBranch();
+        if (currentBranch.equals(arg)) {
             Utils.exitWithError("No need to checkout the current branch.");
         } else if (!BRANCHES.contains(arg)) {
             Utils.exitWithError("No such branch exists.");
         }
-        HEAD = Utils.readObject(head, HEAD.getClass());
-        Commit pointer = HEAD;
-        while (pointer != pointer.getParent()) {
-            printLogInfo(pointer);
-            pointer = pointer.getParent();
-        }
+        HEAD.setBranch(arg);
+        Utils.writeObject(head, HEAD);
     }
 
 
