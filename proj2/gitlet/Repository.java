@@ -21,21 +21,21 @@ class Repository {
     public static final File fileOfAddStage = Utils.join(GITLET_DIR, "addition");
     /** The file with staged Blobs to be removed. */
     public static final File fileOfRemoveStage = Utils.join(GITLET_DIR, "removal");
-    /** The file commit tree. */
-    public static final File fileOfCommits = Utils.join(GITLET_DIR, "commit tree");
     /** The file of HEAD */
     public static final File head = Utils.join(GITLET_DIR, "head");
     /** The file of branches */
     public static final File branches = Utils.join(GITLET_DIR, "branches");
+    /** The file of split points */
+    public static final File splitPoints = Utils.join(GITLET_DIR, "splitPoints");
     /** The initialCommit for all directories. */
     public static final Commit INITIAL_COMMIT = new Commit();
 
     /** The HEAD pointer of this Repository. */
     private Commit HEAD = INITIAL_COMMIT;
-    /** The branches of this Repository. */
-    private ArrayList<String> BRANCHES = new ArrayList<>();
-    /** The map of commits, keys are sha-1, vals are commits */
-    private TreeMap<String, Commit> treeOfCommits = new TreeMap<>();
+    /** The branches mapped to their heads. */
+    private HashMap<String, Commit> BRANCHES = new HashMap<>();
+    /** The split points */
+    private ArrayList<Commit> SPLITPOINTS = new ArrayList<>();
     /** The map of Blobs to be staged */
     private HashMap<String, Blob> stagedForAddition = new HashMap<>();
     private HashMap<String, Blob> stagedForRemoval = new HashMap<>();
@@ -56,7 +56,7 @@ class Repository {
         //treeOfCommits.put(INITIAL_COMMIT.getUID(), INITIAL_COMMIT);
         //set HEAD pointer to the INITIAL_COMMIT.
         HEAD = INITIAL_COMMIT;
-        BRANCHES.add("master");
+        BRANCHES.put("master", INITIAL_COMMIT);
         Utils.writeObject(head, HEAD);
         Utils.writeObject(branches, BRANCHES);
         //Utils.writeObject(fileOfCommits, treeOfCommits);
@@ -112,7 +112,7 @@ class Repository {
             stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
             if (stagedForAddition.get(fileName) != null) {
                 stagedForAddition.remove(fileName);
-                Utils.writeObject(fileOfRemoveStage, stagedForRemoval);
+                Utils.writeObject(fileOfAddStage, stagedForAddition);
             }
         } else {
             Utils.exitWithError("No reason to remove the file.");
@@ -151,9 +151,11 @@ class Repository {
             HEAD.removeBlob(keys);
         }
 
-        //treeOfCommits.put(current.getUID(), current);
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        for (String s : BRANCHES.keySet()) {
+            splitPoint(s);
+        }
         Utils.writeObject(head, HEAD);
-        //Utils.writeObject(fileOfCommits, treeOfCommits);
         Utils.writeObject(Utils.join(COMMITS_DIR, HEAD.getUID()), HEAD);
         clearStagingArea();
     }
@@ -233,7 +235,7 @@ class Repository {
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
         HEAD = Utils.readObject(head, HEAD.getClass());
         String currentBranch = HEAD.getBranch();
-        for (String s : BRANCHES) {
+        for (String s : BRANCHES.keySet()) {
             if (s.equals(currentBranch)) {s = "*" + s;}
             System.out.println(s);
         }
@@ -251,6 +253,13 @@ class Repository {
                 System.out.println(s);
             }
         }
+        ArrayList<File> untrackedFiles = untrackedFiles(HEAD);
+        if (!untrackedFiles.isEmpty()) {
+            System.out.println("=== Untracked Files ===");
+            for (File f : untrackedFiles) {
+                System.out.println(f.getName());
+            }
+        }
     }
 
     /** Creates a new branch with the given name, and points it at the current head commit.
@@ -258,25 +267,89 @@ class Repository {
      * */
     public void branch(String arg) {
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
-        if (BRANCHES.contains(arg)) {
+        if (BRANCHES.keySet().contains(arg)) {
             Utils.exitWithError("A branch with that name already exists.");
         }
-        BRANCHES.add(arg);
+        BRANCHES.put(arg,HEAD);
         Utils.writeObject(branches, BRANCHES);
     }
 
+    /** Moves the pointer to the branch designated by arg.
+     * @param arg The branch name
+     * */
     public void checkoutABranch(String arg) {
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
         HEAD = Utils.readObject(head, HEAD.getClass());
         String currentBranch = HEAD.getBranch();
         if (currentBranch.equals(arg)) {
             Utils.exitWithError("No need to checkout the current branch.");
-        } else if (!BRANCHES.contains(arg)) {
+        } else if (BRANCHES.get(arg) == null) {
             Utils.exitWithError("No such branch exists.");
         }
-        HEAD.setBranch(arg);
+        Commit branchHead = BRANCHES.get(arg);
+        if (!untrackedFiles(HEAD).isEmpty()) {
+            Utils.exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+        for (String fileName : branchHead.getTreeOfBlobs().keySet()) {
+            checkoutCommit(branchHead, fileName);
+        }
+        branchHead.setBranch(arg);
+        HEAD = branchHead;
         Utils.writeObject(head, HEAD);
     }
+
+    /** Removes the branch designated by arg.
+     * @param arg The branch name
+     * */
+    public void rm_branch(String arg) {
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        String currentBranch = HEAD.getBranch();
+        if (currentBranch.equals(arg)) {
+            Utils.exitWithError("Cannot remove the current branch.");
+        } else if (BRANCHES.get(arg) == null) {
+            Utils.exitWithError("A branch with that name does not exist.");
+        }
+        BRANCHES.remove(arg);
+        Utils.writeObject(branches, BRANCHES);
+    }
+
+    /** Checks out all the files tracked by the given commit.
+     * Removes tracked files that are not present in that commit.
+     * Also moves the current branch’s head to that commit node.
+     * @param arg The commit ID.
+     * */
+    public void reset(String arg) {
+        HEAD = Utils.readObject(head, HEAD.getClass());
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        Commit pointer = HEAD;
+        while (pointer != pointer.getParent()) {
+            if (pointer.getUID().equals(arg)) {
+                for (String fileName :
+                        pointer.getTreeOfBlobs().keySet()) {
+                    checkoutCommit(pointer, fileName);
+                }
+                break;
+            }
+            pointer = pointer.getParent();
+        }
+        if (pointer == pointer.getParent()) {
+            Utils.exitWithError("No commit with that id exists.");
+        }
+        BRANCHES.put(HEAD.getBranch(), HEAD);
+        Utils.writeObject(branches, BRANCHES);
+    }
+
+    //not finished
+    /** Merges files from the given branch into the current branch.
+     * @param arg The branch name of which to be merged.
+     * */
+    public void merge(String arg) {
+        SPLITPOINTS = Utils.readObject(splitPoints, SPLITPOINTS.getClass());
+        SPLITPOINTS.add(HEAD);
+        Utils.writeObject(splitPoints, SPLITPOINTS);
+    }
+
 
 
     //Helper functions
@@ -315,5 +388,33 @@ class Repository {
         System.out.println("Date: " + pointer.getTimestamp());
         System.out.println(pointer.getLog());
         System.out.print("\n");
+    }
+
+    /** Check for untracked files. */
+    private ArrayList<File> untrackedFiles(Commit branchHead) {
+        ArrayList<File> untrackedFiles = new ArrayList<>();
+        if (fileOfAddStage.exists()) {
+            stagedForAddition = Utils.readObject(fileOfAddStage, stagedForAddition.getClass());
+        }
+        for (File f : CWD.listFiles()) {
+            if (f.isDirectory() ||
+            stagedForAddition.containsKey(f.getName()) ||
+            branchHead.getTreeOfBlobs().containsKey(f.getName())) {
+                continue;
+            }
+            untrackedFiles.add(f);
+        }
+        return untrackedFiles;
+    }
+
+    /** Find split point */
+    private void splitPoint(String branchName) {
+        BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        Commit branchHead = BRANCHES.get(branchName);
+        if (branchHead.getParent() == HEAD) {
+            SPLITPOINTS = Utils.readObject(splitPoints, SPLITPOINTS.getClass());
+            SPLITPOINTS.add(HEAD);
+            Utils.writeObject(splitPoints, SPLITPOINTS);
+        }
     }
 }

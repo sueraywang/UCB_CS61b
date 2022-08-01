@@ -78,6 +78,21 @@ public class Main {
                 checkInitialization(repository);
                 repository.branch(args[1]);
                 break;
+            case "rm-branch":
+                validateNumArgs("rm_branch", args, 2);
+                checkInitialization(repository);
+                repository.rm_branch(args[1]);
+                break;
+            case "reset":
+                validateNumArgs("reset", args, 2);
+                checkInitialization(repository);
+                repository.reset(args[1]);
+                break;
+            case "merge":
+                validateNumArgs("merge", args, 2);
+                checkInitialization(repository);
+                repository.merge(args[1]);
+                break;
             default:
                 Utils.exitWithError("No command with that name exists.");
         }
