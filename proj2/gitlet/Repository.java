@@ -152,10 +152,10 @@ class Repository {
         }
 
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
-        for (String s : BRANCHES.keySet()) {
-            splitPoint(s);
-        }
+        BRANCHES.put(HEAD.getBranch(),HEAD);
+
         Utils.writeObject(head, HEAD);
+        Utils.writeObject(branches, BRANCHES);
         Utils.writeObject(Utils.join(COMMITS_DIR, HEAD.getUID()), HEAD);
         clearStagingArea();
     }
@@ -267,6 +267,7 @@ class Repository {
      * */
     public void branch(String arg) {
         BRANCHES = Utils.readObject(branches, BRANCHES.getClass());
+        HEAD = Utils.readObject(head, HEAD.getClass());
         if (BRANCHES.keySet().contains(arg)) {
             Utils.exitWithError("A branch with that name already exists.");
         }
@@ -290,9 +291,16 @@ class Repository {
         if (!untrackedFiles(HEAD).isEmpty()) {
             Utils.exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
         }
+
+        for (File f : CWD.listFiles()) {
+            if (!branchHead.getTreeOfBlobs().containsKey(f.getName())) {
+                f.delete();
+            }
+        }
         for (String fileName : branchHead.getTreeOfBlobs().keySet()) {
             checkoutCommit(branchHead, fileName);
         }
+
         branchHead.setBranch(arg);
         HEAD = branchHead;
         Utils.writeObject(head, HEAD);
@@ -325,8 +333,12 @@ class Repository {
         Commit pointer = HEAD;
         while (pointer != pointer.getParent()) {
             if (pointer.getUID().equals(arg)) {
-                for (String fileName :
-                        pointer.getTreeOfBlobs().keySet()) {
+                for (File f : CWD.listFiles()) {
+                    if (!pointer.getTreeOfBlobs().containsKey(f.getName())) {
+                        f.delete();
+                    }
+                }
+                for (String fileName : pointer.getTreeOfBlobs().keySet()) {
                     checkoutCommit(pointer, fileName);
                 }
                 break;
